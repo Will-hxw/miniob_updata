@@ -126,6 +126,7 @@ class RecordPageHandler
 {
 public:
   RecordPageHandler(StorageFormat storage_format) : storage_format_(storage_format) {}
+  RecordPageHandler() = default;
   virtual ~RecordPageHandler();
   static RecordPageHandler *create(StorageFormat format);
 
@@ -202,6 +203,7 @@ public:
    */
   virtual RC update_record(const RID &rid, const char *data) { return RC::UNIMPLEMENTED; }
 
+  virtual RC update_record(Record *rec);
   /**
    * @brief 获取指定位置的记录数据
    *
@@ -378,6 +380,14 @@ public:
    * @param rid 待删除记录的标识符
    */
   RC delete_record(const RID *rid);
+
+  /**
+   * @brief 更新指定槽位的记录
+   *
+   * @param rid 待更新记录的标识符
+   * @param data 更新后的数据
+   */
+  RC update_record(Record *rec);
 
   /**
    * @brief 插入一个新的记录到指定文件中，并返回该记录的标识符

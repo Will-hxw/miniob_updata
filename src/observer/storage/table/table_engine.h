@@ -39,6 +39,7 @@ public:
 
   virtual RC insert_record(Record &record)              = 0;
   virtual RC delete_record(const Record &record)        = 0;
+  virtual RC update_record(Record &record, const char *attr_name, Value *value) = 0;
   virtual RC get_record(const RID &rid, Record &record) = 0;
 
   virtual RC     create_index(Trx *trx, const FieldMeta *field_meta, const char *index_name) = 0;

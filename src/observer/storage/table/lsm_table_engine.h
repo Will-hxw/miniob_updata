@@ -30,6 +30,7 @@ public:
 
   RC insert_record(Record &record) override;
   RC delete_record(const Record &record) override { return RC::UNIMPLEMENTED; }
+  RC update_record(Record &record, const char *attr_name, Value *value) override { return RC::UNIMPLEMENTED; }
   RC get_record(const RID &rid, Record &record) override { return RC::UNIMPLEMENTED; }
 
   RC create_index(Trx *trx, const FieldMeta *field_meta, const char *index_name) override { return RC::UNIMPLEMENTED; }

@@ -82,6 +82,8 @@ public:
    */
   RC insert_record(Record &record);
   RC delete_record(const Record &record);
+  RC update_record(Record &record, const char *attr_name, Value *value);
+  RC update_records(Record &record, std::vector<std::pair<Value, FieldMeta>> update_map_);
   RC get_record(const RID &rid, Record &record);
 
   // TODO refactor

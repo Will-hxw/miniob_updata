@@ -28,8 +28,8 @@ public:
 
   RC insert_record(Record &record) override;
   RC delete_record(const Record &record) override;
+  RC update_record(Record &record, const char *attr_name, Value *value) override;
   RC get_record(const RID &rid, Record &record) override;
-
   RC create_index(Trx *trx, const FieldMeta *field_meta, const char *index_name) override;
   RC get_record_scanner(RecordScanner *&scanner, Trx *trx, ReadWriteMode mode) override;
   RC get_chunk_scanner(ChunkFileScanner &scanner, Trx *trx, ReadWriteMode mode) override;
@@ -42,6 +42,8 @@ public:
   // init_record_handler
   RC init() override;
 
+public:
+  Table* table() const { return table_; }
 private:
   RC insert_entry_of_indexes(const char *record, const RID &rid);
   RC delete_entry_of_indexes(const char *record, const RID &rid, bool error_on_not_exists);

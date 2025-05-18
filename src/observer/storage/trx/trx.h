@@ -146,7 +146,9 @@ public:
   virtual RC insert_record(Table *table, Record &record)                    = 0;
   virtual RC delete_record(Table *table, Record &record)                    = 0;
   virtual RC visit_record(Table *table, Record &record, ReadWriteMode mode) = 0;
-
+  // virtual RC update_record(Table *table, Record &record, const std::pair<Value,FieldMeta> &target) = 0;
+  // virtual RC update_record(Table *table, Record &record, const std::pair<Value,char> &target) = 0;
+  virtual RC update_record(Table *table, Record &record, const char *attr_name, Value *value) = 0;
   virtual RC start_if_need() = 0;
   virtual RC commit()        = 0;
   virtual RC rollback()      = 0;

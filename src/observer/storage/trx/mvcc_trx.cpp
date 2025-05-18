@@ -185,7 +185,22 @@ RC MvccTrx::delete_record(Table *table, Record &record)
 
   return RC::SUCCESS;
 }
+RC MvccTrx::update_record(Table *table, Record &record, const char *attr_name, Value *value) {
+  return table->update_record(record, attr_name, value);
+}
 
+
+// RC MvccTrx::update_record(Table *table, Record &record, const std::pair<Value,char> &target)
+// {
+//    return table->update_record(record, target);
+//   }
+
+
+// RC MvccTrx::update_record(Table *table, Record &record, const std::pair<Value, FieldMeta> &target)
+// {
+//   // Explicitly qualify inherited members or methods if needed
+//   return this->MvccTrxKit::update_record(table, record, target);
+// }
 RC MvccTrx::visit_record(Table *table, Record &record, ReadWriteMode mode)
 {
   Field begin_field;
@@ -219,7 +234,7 @@ RC MvccTrx::visit_record(Table *table, Record &record, ReadWriteMode mode)
       if (-end_xid != trx_id_) {
         rc = RC::SUCCESS;
       } else {
-        LOG_TRACE("record invisible. self has deleted this record. trx id=%d, begin xid=%d, end xid=%d",
+        LOG_TRACE("record invisible. self has updated this record. trx id=%d, begin xid=%d, end xid=%d",
                   trx_id_, begin_xid, end_xid);
         rc = RC::RECORD_INVISIBLE;
       }
@@ -232,7 +247,7 @@ RC MvccTrx::visit_record(Table *table, Record &record, ReadWriteMode mode)
                   trx_id_, begin_xid, end_xid);
         rc = RC::LOCKED_CONCURRENCY_CONFLICT;
       } else {
-        LOG_TRACE("record invisible. self has deleted this record. trx id=%d, begin xid=%d, end xid=%d",
+        LOG_TRACE("record invisible. self has updated this record. trx id=%d, begin xid=%d, end xid=%d",
                   trx_id_, begin_xid, end_xid);
         rc = RC::RECORD_INVISIBLE;
       }

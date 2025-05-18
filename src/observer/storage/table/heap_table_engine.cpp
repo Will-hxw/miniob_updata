@@ -90,6 +90,78 @@ RC HeapTableEngine::delete_record(const Record &record)
   return rc;
 }
 
+RC HeapTableEngine::update_record(Record &record, const char *attr_name, Value *value) {
+  // 遍历表格的全部域，找到目标域
+  const int sys_field_num = table_meta_->sys_field_num();
+  const int user_field_num = table_meta_->field_num() - sys_field_num;
+  FieldMeta *targetFiled = nullptr;
+
+  int i = 0;
+  for (; i < user_field_num; i++) {
+    const FieldMeta *field_meta = table_meta_->field(sys_field_num + i);
+    const char *field_name = field_meta->name();
+
+    // 找到目标域
+    if (strcmp(field_name, attr_name) == 0) {
+      // 类型匹配检查
+      if (field_meta->type() != value->attr_type()) {
+        Value real_value;
+        RC rc = Value::cast_to(*value, field_meta->type(), real_value);
+        if (OB_FAIL(rc)) return rc;
+        *value = std::move(real_value);
+      }
+
+      // 拿到目标域
+      targetFiled = (FieldMeta *)field_meta;
+      break;
+    }
+  }
+
+  // 域存在检查
+  if (nullptr == targetFiled) {
+    return RC::SCHEMA_FIELD_NOT_EXIST;
+  }
+
+  int field_offset = targetFiled->offset();
+  int field_length = targetFiled->len();
+
+  // 修改旧数据
+  char *old_data = record.data();
+
+  // 暂时备份旧数据
+  char *backup_data = (char *)malloc(record.len());
+  memcpy(backup_data, old_data, record.len());
+
+  // 对于 CHARS 这种不定长的记录，如果更新的元素大于原来的长度，需要截断
+  if (value->length() > field_length && targetFiled->type() != AttrType::VECTORS) {
+    memcpy(old_data + field_offset, value->data(), field_length);
+  } 
+  // 对于 CHARS
+  // 这种不定长的记录，如果更新的元素小于原来的长度，需要额外抹去原有元素
+  else {
+    memcpy(old_data + field_offset, value->data(), value->length());
+    memset(old_data + field_offset + value->length(), 0, field_length - value->length());
+  }
+
+  // 更新数据
+
+  record.set_data(old_data);
+
+  Index *index = this->find_index_by_field(targetFiled->name());
+
+  // 单字段索引更新和检查
+  if (index != nullptr) {
+    RC rc = index->insert_entry(record.data(), &record.rid());
+    if (rc != RC::SUCCESS && strcmp(old_data, backup_data) != 0) {
+      LOG_ERROR("Failed to update data, recovering. table=%s, rc=%d:%s", table(), rc, strrc(rc));
+      return rc;
+    }
+  }
+
+  RC rc = record_handler_->update_record(&record);
+  // delete old_data;
+  return rc;
+}
 RC HeapTableEngine::get_record_scanner(RecordScanner *&scanner, Trx *trx, ReadWriteMode mode)
 {
   scanner = new HeapRecordScanner(table_, *data_buffer_pool_, trx, db_->log_handler(), mode, nullptr);

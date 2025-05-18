@@ -72,6 +72,13 @@ public:
    * @brief 根据表名查找表
    */
   Table *find_table(const char *table_name) const;
+
+  /**
+   * @brief 根据表名查找表
+   * @details 如果没有找到，返回RC::NOT_EXIST
+   */
+  RC find_table(const char *table_name, Table *&table) const;
+
   /**
    * @brief 根据表ID查找表
    */

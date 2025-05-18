@@ -179,7 +179,15 @@ Table *Db::find_table(const char *table_name) const
   }
   return nullptr;
 }
-
+RC Db::find_table(const char *table_name, Table *&table) const
+{
+  table = find_table(table_name);
+  if (table == nullptr) {
+    LOG_ERROR("Table %s not found", table_name);
+    return RC::NOT_EXIST;
+  }
+  return RC::SUCCESS;
+}
 Table *Db::find_table(int32_t table_id) const
 {
   for (auto pair : opened_tables_) {
